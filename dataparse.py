@@ -94,10 +94,30 @@ if not os.path.isfile('./Data/trainingusersdf.parquet.gzip'):
 # Generate csv of training data with filename "./Data/traininglist.csv" for the PyClustering library to use
 # The file will have the following format (all values are rating values):
 #
-#       movie1user1, movie2user1, movie3user1, ... , movieMuser1
-#       movie1user2, movie2user2, movie3user2, ... , movieMuser2
-#            ...         ...         ...        ...      ...
-#       movie1userU, movie2userU, movie3userU, ... , movieMuserU
+#       movie1user1 movie2user1 movie3user1 ...  movieMuser1
+#       movie1user2 movie2user2 movie3user2 ...  movieMuser2
+#            ...         ...       ...      ...      ...
+#       movie1userU movie2userU movie3userU ...  movieMuserU
 #
 # Here movie1user1 is the Rating that UserId=1 gave MovieId=1. Here M is the movie with the largest id and U is the
 # user with the largest id. If a user has not rated a movie, then it is 0.
+# if not os.path.isfile('./Data/traininglist.txt'):
+#     df = pd.read_parquet('./Data/trainingusersdf.parquet.gzip')
+#     sortedUserIds = sorted(df['UserId'].unique())  # list of unique UserIds in the training set
+#     maxmovieid = df['MovieId'].max()  # largest movie id
+#     with open('./Data/traininglist.txt', 'w', newline='') as file:
+#         mywriter = csv.writer(file, delimiter=' ')
+#         for uid in sortedUserIds:
+#             # This is a vector representing uid's point in movie preference space.
+#             # We will be appending this to the txt file.
+#             # uidvector = [0, 0, 0, 2, 0, 4, 0, ..., 3] means the user with UserId = uid gave the movie with MovieId = 3 a rating of 2,
+#             # the movie with MovieId = 5 a rating of 4, and the movie with MovieId = maxmovieid a rating of 3.
+#             uidvector = [0] * (maxmovieid + 1)
+#             dfuid = df[df.UserId == uid]
+#             for index, row in dfuid.iterrows():
+#                 uidvector[row['MovieId']] = row['Rating']
+#             mywriter.writerow(uidvector[1:])  # Don't use the first index. There is no movie with MovieId = 0.
+
+df = pd.read_parquet('./Data/trainingusersdf.parquet.gzip')
+df = pd.pivot_table(df, values='Rating', index='UserId', columns='MovieId', fill_value=0)
+print(df.shape)
