@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
+from yellowbrick.cluster import KElbowVisualizer
+from sklearn.cluster import KMeans
 
 # Loading the ratings data and filtering out the outliers
 if not os.path.isfile('./Data/removedoutliersdf.parquet.gzip'):
@@ -93,3 +95,14 @@ if not os.path.isfile('./Data/testusersdf.parquet.gzip'):
     print("Test data set statistics:")
     print(df2.describe())
     df2.to_parquet('./Data/testusersdf.parquet.gzip', compression='gzip')
+
+# Pivot the data frame into a user-item matrix
+df = pd.read_parquet('./Data/trainingusersdf.parquet.gzip')
+df = pd.pivot_table(df, values='Rating', index='UserId', columns='MovieId', fill_value=0)
+
+# Finding best number of clusters for kmeans
+model = KMeans()
+# k is range of number of clusters.
+visualizer = KElbowVisualizer(model, k=[i for i in range(18,26)], timings=True)
+visualizer.fit(df)        # Fit data to visualizer
+visualizer.show()        # Finalize and render figure
