@@ -1,2 +1,3 @@
 Data/combined_data_*.txt
 Data/*.gzip
+.ipynb_checkpoints
